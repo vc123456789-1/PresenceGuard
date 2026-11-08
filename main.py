@@ -365,8 +365,8 @@ class App:
         if not self.model.is_file():
             messagebox.showinfo('Real lock', 'Register your face first.', parent=self.root)
             return
-        if self.policy.checks < 3:
-            messagebox.showinfo('Real lock', 'Complete three successful camera tests first.', parent=self.root)
+        if self.policy.checks < 1:
+            messagebox.showinfo('Real lock', 'Complete a successful camera test first.', parent=self.root)
             return
         if not self.settings['anti_photo']:
             messagebox.showinfo('Real lock', 'Enable experimental photo protection in Settings first.', parent=self.root)
@@ -447,7 +447,7 @@ class App:
             self.root.bell()
             self.log('Not recognized twice. Lock decision in 15 seconds.')
         elif kind == 'test':
-            self.status.set(text + ' Successful tests: %d/3.' % self.policy.checks)
+            self.status.set(text + (' Camera test passed.' if self.policy.checks else ' Camera test failed.'))
             if self.setup_active:
                 self.setup_active = False
                 if ok:

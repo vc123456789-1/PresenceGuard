@@ -2,7 +2,7 @@
 
 ## Safety status
 
-Every launch starts in test mode. Real Windows locking is available only after the in-app PIN, manual-test and confirmation steps for the current session. The user reported testing both an unregistered person and printed or phone-displayed photos. The test conditions, detailed outcomes and error rates have not been independently recorded here. Automated tests mock lock requests and did not lock the computer. The software is not independently validated as a security product.
+Every launch starts in test mode. Real Windows locking is available only after the in-app PIN, one successful manual camera test and confirmation steps for the current session. The user reported testing both an unregistered person and printed or phone-displayed photos. The test conditions, detailed outcomes and error rates have not been independently recorded here. Automated tests mock lock requests and did not lock the computer. The software is not independently validated as a security product.
 
 ## Automated tests
 

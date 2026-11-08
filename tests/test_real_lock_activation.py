@@ -14,7 +14,7 @@ class RealLockActivationTests(unittest.TestCase):
         self.root.withdraw()
         self.app = main.App(self.root, Path(self.temp.name))
         self.app.model.touch()
-        self.app.policy.checks = 3
+        self.app.policy.checks = 1
 
     def tearDown(self):
         self.root.destroy()
@@ -32,8 +32,8 @@ class RealLockActivationTests(unittest.TestCase):
         self.activate(authorized=False)
         self.assertFalse(self.app.policy.armed)
 
-    def test_cannot_arm_without_three_successful_manual_checks(self):
-        self.app.policy.checks = 2
+    def test_cannot_arm_without_one_successful_manual_check(self):
+        self.app.policy.checks = 0
         self.activate()
         self.assertFalse(self.app.policy.armed)
 

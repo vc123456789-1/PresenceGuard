@@ -139,8 +139,7 @@ class RulesTests(unittest.TestCase):
         p = guard.Policy()
         with self.assertRaises(ValueError):
             p.arm(True)
-        for _ in range(3):
-            p.result(True, 10, automatic=False)
+        p.result(True, 10, automatic=False)
         with self.assertRaises(ValueError):
             p.arm(False)
         p.arm(True)

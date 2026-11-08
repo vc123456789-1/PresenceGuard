@@ -170,8 +170,8 @@ class Policy:
         self.clear()
 
     def arm(self, confirmed=False):
-        if not confirmed or self.checks < 3:
-            raise ValueError('Complete three successful tests and confirm first.')
+        if not confirmed or self.checks < 1:
+            raise ValueError('Complete a successful test and confirm first.')
         self.armed = True
 
     def result(self, success, now, automatic=True):
