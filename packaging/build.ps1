@@ -1,11 +1,12 @@
 # Run from any directory on 64-bit Windows with Python 3.12 and Inno Setup 6.4.3.
 # Produces an onedir build, a portable ZIP and a per-user installer.
-param([string]$Python = 'py', [string]$InnoCompiler = '')
+param([string]$Python = 'py', [string]$InnoCompiler = '', [string]$BuildPython = '')
 $ErrorActionPreference = 'Stop'
 $project = Split-Path -Parent $PSScriptRoot
 Set-Location -LiteralPath $project
 if (-not [Environment]::Is64BitOperatingSystem) { throw 'A 64-bit Windows build host is required.' }
-$venvPython = Join-Path $project '.venv\Scripts\python.exe'
+$venvPython = if ($BuildPython) { $BuildPython } else { Join-Path $project '.venv\Scripts\python.exe' }
+if ($BuildPython -and -not (Test-Path -LiteralPath $venvPython -PathType Leaf)) { throw 'Specified build Python was not found.' }
 if (-not (Test-Path -LiteralPath $venvPython)) {
     & $Python -3.12 -m venv .venv
     if ($LASTEXITCODE -ne 0) { throw 'Could not create the build environment.' }

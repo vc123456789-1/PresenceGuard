@@ -2,11 +2,11 @@
 
 ## Safety status
 
-Real Windows locking is disabled in this build because identity and photo/video rejection have not been validated. Automated tests mock lock requests and did not lock the computer. This is a review build, not a validated security product.
+Every launch starts in test mode. Real Windows locking is available only after the in-app PIN, manual-test and confirmation steps for the current session. The user reported testing both an unregistered person and printed or phone-displayed photos. The test conditions, detailed outcomes and error rates have not been independently recorded here. Automated tests mock lock requests and did not lock the computer. The software is not independently validated as a security product.
 
 ## Automated tests
 
-Run on the build machine with `python -m unittest discover -s tests -v`. The initial unchanged project passed 41 tests. The updated tests cover interval limits; salted PIN verification and progressive persistent waits; test-mode lock simulation; pause and keep-awake policy; energy-request expiration and release through mocks; unavailable camera and cancellation; empty, dark and multiple-face input; local DPAPI template round-trip; startup shortcut logic with simulated PowerShell; and lock/unlock state transitions. A Windows session-notification registration and synthetic message test does not lock the session. The updated suite passed 79 tests on the build machine; no Windows lock was requested.
+Run on the build machine with `python -m unittest discover -s tests -v`. The initial unchanged project passed 41 tests. The updated tests cover interval limits; salted PIN verification and progressive persistent waits; test-mode lock simulation; pause and keep-awake policy; energy-request expiration and release through mocks; unavailable camera and cancellation; empty, dark and multiple-face input; local DPAPI template round-trip; startup shortcut logic with simulated PowerShell; and lock/unlock state transitions. A Windows session-notification registration and synthetic message test does not lock the session. The current suite passed 88 tests on the build machine. No automated Windows lock was requested.
 
 The model files were loaded using OpenCV and synthetic image input. That is a resource and inference smoke test, not an accuracy test. In the source application, the three sections were inspected on screen. The 30-minute timer was started; a five-second duration expired; and stopping a running timer was checked. A real Windows power request was accepted and then released on the same thread.
 
@@ -14,8 +14,8 @@ A real tray icon was created. Closing the application window hid it while the pr
 
 ## Not performed
 
-- Owner recognition in normal and dim light, with glasses and angles.
-- Rejection of another person and printed or phone-displayed photographs and video.
+- Independently observed and recorded owner recognition in normal and dim light, with glasses and angles.
+- Independently observed and recorded rejection of another person and printed or phone-displayed photographs and video.
 - Camera occupied, disconnected or permission denied on a physical device.
 - Full recognition latency, memory consumption and threshold calibration on the target laptop.
 - Supervised real lock and unlock, whether background processes continue through that real lock, and visual automation on a locked desktop.

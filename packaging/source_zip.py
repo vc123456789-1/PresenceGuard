@@ -8,7 +8,7 @@ FILES = [
     'vision.py', 'platform_support.py', 'windows_session.py',
     'docs/MODELS.md', 'docs/TEST_REPORT.md',
     'packaging/build.ps1', 'packaging/installer.iss', 'packaging/app.ico',
-    'packaging/requirements-build.txt', 'packaging/source_zip.py',
+    'packaging/requirements-build.txt', 'packaging/source_zip.py', 'packaging/publish_release.py',
     'models/face_detection_yunet_2023mar.onnx',
     'models/face_recognition_sface_2021dec.onnx',
     'models/YUNET-LICENSE.txt', 'models/SFACE-LICENSE.txt',

@@ -115,6 +115,7 @@ class App:
         ttk.Label(general, textvariable=self.summary, justify='left').grid(row=0, column=0, columnspan=3, sticky='w')
         ttk.Button(general, text='Start', command=self.start_protection).grid(row=1, column=0, sticky='w', pady=(6, 0))
         ttk.Button(general, text='Stop', command=self.stop_protection).grid(row=1, column=1, sticky='w', padx=5, pady=(6, 0))
+        ttk.Button(general, text='Enable real lock', command=self.arm).grid(row=1, column=2, sticky='w', padx=5, pady=(6, 0))
 
         settings = ttk.LabelFrame(frame, text='Settings', padding=8)
         settings.pack(fill='x', pady=(0, 6))
@@ -359,11 +360,34 @@ class App:
             self.launch_scan('test')
 
     def arm(self):
-        if not self.authorize():
+        if self.job or not self.authorize():
             return
-        messagebox.showinfo('Real lock unavailable',
-                            'Real locking is disabled in this build. Identity and photo tests have not been validated.',
-                            parent=self.root)
+        if not self.model.is_file():
+            messagebox.showinfo('Real lock', 'Register your face first.', parent=self.root)
+            return
+        if self.policy.checks < 3:
+            messagebox.showinfo('Real lock', 'Complete three successful camera tests first.', parent=self.root)
+            return
+        if not self.settings['anti_photo']:
+            messagebox.showinfo('Real lock', 'Enable experimental photo protection in Settings first.', parent=self.root)
+            return
+        verified = messagebox.askyesno(
+            'Confirm validation',
+            'Have you tested your face, another person, and printed and phone photos? '
+            'Photo protection is experimental and can fail.', parent=self.root)
+        if not verified:
+            return
+        confirmed = messagebox.askyesno(
+            'Enable real lock',
+            'Enable Windows locking for this session? Two failed checks start a 15-second grace period. '
+            'You will need your Windows sign-in to unlock.', parent=self.root)
+        if not confirmed:
+            return
+        self.invalidate()
+        self.policy.arm(confirmed=True)
+        self.next_check = time.monotonic() + self.settings['interval_seconds']
+        self.log('Real lock enabled for this session. Start protection if it is off.')
+        self.refresh()
 
     def launch_scan(self, kind):
         if self.job:
@@ -412,6 +436,8 @@ class App:
                 self.setup_active = False
             return
         if ok is None:
+            if kind == 'test':
+                self.policy.checks = 0
             self.next_check = now + self.settings['interval_seconds']
             return
         self.last_check = time.strftime('%H:%M:%S')

@@ -1,8 +1,8 @@
 # PresenceGuard
 
-PresenceGuard is a small Windows app that checks whether a registered person is at the computer. It runs locally and simulates a lock decision after two failed checks and a 15-second grace period. This build does not request a real Windows lock. A normal Windows lock keeps your apps and session open. PresenceGuard does not close programs or sign you out.
+PresenceGuard is a small Windows app that checks whether a registered person is at the computer. It runs locally and can request a Windows lock after two failed checks and a 15-second grace period when real locking has been explicitly enabled for the current session. A normal Windows lock keeps your apps and session open. PresenceGuard does not close programs or sign you out.
 
-**This build runs in test mode only.** Checks never lock Windows. Real locking is unavailable until the recognition and photo challenge have been validated. Face matching and the experimental photo challenge have not been validated as security controls. A printed photo, phone, video, poor lighting, camera problem or other condition may defeat a check or cause a false rejection. Do not rely on this app as your only security measure. Use a Windows password or PIN. PresenceGuard cannot prevent someone with access to the account from stopping or changing it.
+**Every launch starts in test mode.** Test mode never locks Windows. Real locking requires explicit in-app confirmation for the current session. The face matching and experimental photo challenge have not been independently validated as security controls. A printed photo, phone, video, poor lighting, camera problem or other condition may defeat a check or cause a false rejection. Do not rely on this app as your only security measure. Use a Windows password or PIN. PresenceGuard cannot prevent someone with access to the account from stopping or changing it.
 
 ## Install
 
@@ -15,9 +15,9 @@ For a portable copy, extract `PresenceGuard-Portable-x64.zip` to a stable folder
 1. Open PresenceGuard and create a local PIN. This is not your Windows PIN. Keep your Windows sign-in credentials available.
 2. Choose the camera and register your face. Capture all three phases: normal light, dim light and different angles. Use one person in view. Images stay in memory and are discarded; only protected feature vectors are stored.
 3. Run the camera test with normal and dim light, glasses if used, and different positions. Also test a different person and printed and phone-displayed photos in a supervised session. The program cannot certify the results itself.
-4. Review your test results. Real locking is unavailable in this build until both identity matching and the photo challenge have been validated. No installer or startup option enables it.
+4. Review your test results. To enable real locking for this session, first complete three consecutive successful manual camera tests with photo protection enabled. Then select **Enable real lock**, enter your PIN, and confirm your identity and photo tests and the real-lock warning. Select **Start** if protection is off. Restarting the app returns it to test mode; installation and startup never enable real locking automatically.
 
-The main window has General, Settings and Keep PC awake sections. General shows the protection status, check interval and last check, with Start and Stop controls. Settings contains camera, face registration, test and PIN controls. Protection is checked every three minutes by default. Settings can change the interval using seconds, minutes or hours. Low-light enhancement is applied consistently during registration and checks. It cannot recover detail in total darkness. Photo protection is experimental: a blink challenge is separate from identity matching, and it is not a proven defence against photos, screens or video.
+The main window has General, Settings and Keep PC awake sections. General shows the protection status, check interval and last check, with Start, Stop and Enable real lock controls. Settings contains camera, face registration, test and PIN controls. Protection is checked every three minutes by default. At that interval, two failed checks and the grace period may take roughly four minutes from starting protection; camera timing varies. Settings can change the interval using seconds, minutes or hours. Low-light enhancement is applied consistently during registration and checks. It cannot recover detail in total darkness. Photo protection is experimental: a blink challenge is separate from identity matching, and it is not a proven defence against photos, screens or video.
 
 Closing the window hides it in the Windows notification area while protection continues. Open it from the tray icon, including the hidden-icons menu. If the tray cannot start, the window remains available. Pause and exit are protected by the local PIN. The Windows lock screen remains the real lock screen; PresenceGuard does not unlock Windows or store the Windows password.
 
@@ -41,7 +41,7 @@ Old LBPH registrations are not compatible with the new embedding model. Register
 
 The application uses OpenCV YuNet `face_detection_yunet_2023mar.onnx` for detection and five-point alignment, and OpenCV SFace `face_recognition_sface_2021dec.onnx` for local identity embeddings. Both run on CPU without an NVIDIA GPU or internet connection. The SFace cosine threshold is an initial example value, not a calibrated security threshold. The model comparison, exact hashes, license terms, source links and unresolved rights question are in [docs/MODELS.md](docs/MODELS.md).
 
-**No claim of accuracy or photo/video resistance is made for this application.** Owner and impostor acceptance/rejection tests, webcam testing, low-light conditions, RAM measurements and a clean-machine installation must be recorded separately. Any future real-lock feature needs a supervised validation session; never run automated lock tests unattended.
+**No claim of accuracy or photo/video resistance is made for this application.** Owner and impostor acceptance/rejection tests, webcam testing, low-light conditions, RAM measurements and a clean-machine installation must be recorded separately. Real locking needs a supervised validation session; never run automated lock tests unattended.
 
 ## Explore and run the source
 
@@ -56,7 +56,7 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe main.py
 ```
 
-The tests do not request a Windows lock. The source application also starts in test mode and does not enable real locking.
+The tests do not request a Windows lock. The source application also starts in test mode; real locking requires the same in-app steps and explicit confirmation.
 
 ## Building from source
 
