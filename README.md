@@ -8,7 +8,7 @@ PresenceGuard is a small Windows app that checks whether a registered person is 
 
 On Windows x64, run `PresenceGuard-Setup-x64.exe`. The installer includes the application, Python runtime, libraries and models. It installs for the current user under `%LOCALAPPDATA%\Programs\PresenceGuard` and creates a Start menu shortcut. It offers a desktop shortcut and an uninstaller; administrator rights are not normally needed. Python, pip and a terminal are not required for everyday use.
 
-For a portable copy, extract `PresenceGuard-Portable-x64.zip` to a stable folder and open `PresenceGuard.exe` inside the extracted `PresenceGuard` folder. The portable ZIP contains the executable application, not just source code. Do not run directly from inside the ZIP. Both distributions still use the current user's local data folder. Installing and running on a clean Windows system without Python remains unverified unless separately recorded in the test report.
+For a portable copy, extract `PresenceGuard-Portable-x64.zip` to a stable folder and open `PresenceGuard.exe` inside the extracted `PresenceGuard` folder. The portable ZIP contains the executable application, not just source code. Do not run directly from inside the ZIP. Both distributions still use the current user's local data folder. **Start with Windows** is available from the installed copy only. In portable or source mode the option is unavailable; other settings can still be saved, and an existing startup entry is left unchanged. Installing and running on a clean Windows system without Python remains unverified unless separately recorded in the test report.
 
 ## First use
 

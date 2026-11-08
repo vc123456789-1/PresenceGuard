@@ -23,6 +23,13 @@ def startup_path():
     return Path(os.environ.get('APPDATA', str(Path.home()))) / 'Microsoft/Windows/Start Menu/Programs/Startup/PresenceGuard.lnk'
 
 
+def startup_available():
+    if os.name != 'nt' or not getattr(sys, 'frozen', False):
+        return False
+    installed = (Path(os.environ.get('LOCALAPPDATA', str(Path.home()))) / 'Programs' / 'PresenceGuard' / 'PresenceGuard.exe').resolve()
+    return os.path.normcase(str(Path(sys.executable).resolve())) == os.path.normcase(str(installed))
+
+
 def configure_startup(enabled):
     if os.name != 'nt':
         raise RuntimeError('Startup is available on Windows only.')
@@ -553,12 +560,18 @@ class App:
         ttk.Entry(frame, textvariable=value, width=10).grid(row=0, column=1)
         ttk.Combobox(frame, textvariable=unit, values=('seconds', 'minutes', 'hours'), state='readonly', width=10).grid(row=0, column=2)
         flags = {}
+        can_start_with_windows = startup_available()
         for row, (key, title) in enumerate((('low_light', 'Low light'), ('anti_photo', 'Photo protection — Experimental'), ('startup', 'Start with Windows')), 1):
             flags[key] = tk.BooleanVar(value=self.settings[key])
-            ttk.Checkbutton(frame, text=title, variable=flags[key]).grid(row=row, column=0, columnspan=3, sticky='w', pady=5)
+            control = ttk.Checkbutton(frame, text=title, variable=flags[key])
+            if key == 'startup' and not can_start_with_windows:
+                control.state(['disabled'])
+            control.grid(row=row, column=0, columnspan=3, sticky='w', pady=5)
+        if not can_start_with_windows:
+            ttk.Label(frame, text='Install PresenceGuard to enable startup.').grid(row=4, column=0, columnspan=3, sticky='w')
         camera = tk.StringVar(value=str(self.settings['camera']))
-        ttk.Label(frame, text='Camera number (0–10):').grid(row=4, column=0, sticky='w')
-        ttk.Spinbox(frame, from_=0, to=10, textvariable=camera, width=8).grid(row=4, column=1)
+        ttk.Label(frame, text='Camera number (0–10):').grid(row=5, column=0, sticky='w')
+        ttk.Spinbox(frame, from_=0, to=10, textvariable=camera, width=8).grid(row=5, column=1)
         def save():
             try:
                 fresh = self.settings.copy()
@@ -566,7 +579,8 @@ class App:
                 fresh.update(interval_seconds=seconds(value.get(), unit.get()), camera=int(camera.get()))
                 if not 0 <= fresh['camera'] <= 10:
                     raise ValueError('Choose a camera number from 0 to 10.')
-                configure_startup(fresh['startup'])
+                if can_start_with_windows:
+                    configure_startup(fresh['startup'])
                 write_json(self.data / 'settings.json', fresh)
                 self.settings = fresh
                 self.invalidate()
@@ -579,7 +593,7 @@ class App:
                     self.root.after(100, self.setup_register)
             except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as exc:
                 messagebox.showerror('Settings', str(exc), parent=dialog)
-        ttk.Button(frame, text='Save', command=save).grid(row=5, column=0, columnspan=3, pady=14)
+        ttk.Button(frame, text='Save', command=save).grid(row=6, column=0, columnspan=3, pady=14)
 
     def setup_register(self):
         if messagebox.askyesno('Setup', 'Camera selected. Register your face now?', parent=self.root):
