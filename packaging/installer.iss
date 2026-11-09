@@ -1,5 +1,5 @@
 #define AppName "PresenceGuard"
-#define AppVersion "1.1.1"
+#define AppVersion "1.1.2"
 #define AppExe "PresenceGuard.exe"
 
 [Setup]

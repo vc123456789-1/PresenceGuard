@@ -170,8 +170,8 @@ class Policy:
         self.clear()
 
     def arm(self, confirmed=False):
-        if not confirmed or self.checks < 1:
-            raise ValueError('Complete a successful test and confirm first.')
+        if not confirmed:
+            raise ValueError('Confirm real locking first.')
         self.armed = True
 
     def result(self, success, now, automatic=True):

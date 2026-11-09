@@ -57,7 +57,7 @@ class NewAppTests(unittest.TestCase):
         with patch('main.session_unlocked', return_value=False), patch.object(self.app, 'launch_scan') as scan:
             self.app.tick()
         scan.assert_not_called()
-    def test_real_lock_unavailable_without_validation(self):
+    def test_real_lock_unavailable_without_registered_face(self):
         self.app.policy.checks = 3
         with patch.object(self.app, 'authorize', return_value=True), patch('main.messagebox.showinfo'):
             self.app.arm()

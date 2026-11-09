@@ -367,33 +367,24 @@ class App:
             self.launch_scan('test')
 
     def arm(self):
-        if self.job or not self.authorize():
+        if self.job:
+            messagebox.showinfo('Real lock', 'Wait for the camera check to finish.', parent=self.root)
             return
         if not self.model.is_file():
             messagebox.showinfo('Real lock', 'Register your face first.', parent=self.root)
             return
-        if self.policy.checks < 1:
-            messagebox.showinfo('Real lock', 'Complete a successful camera test first.', parent=self.root)
-            return
-        if not self.settings['anti_photo']:
-            messagebox.showinfo('Real lock', 'Enable experimental photo protection in Settings first.', parent=self.root)
-            return
-        verified = messagebox.askyesno(
-            'Confirm validation',
-            'Have you tested your face, another person, and printed and phone photos? '
-            'Photo protection is experimental and can fail.', parent=self.root)
-        if not verified:
-            return
         confirmed = messagebox.askyesno(
             'Enable real lock',
-            'Enable Windows locking for this session? Two failed checks start a 15-second grace period. '
-            'You will need your Windows sign-in to unlock.', parent=self.root)
+            'Lock Windows after two failed checks? You can unlock with your Windows PIN. '
+            'Face checks may fail.', parent=self.root)
         if not confirmed:
             return
         self.invalidate()
         self.policy.arm(confirmed=True)
+        self.policy.pause_until = 0
+        self.policy.start()
         self.next_check = time.monotonic() + self.settings['interval_seconds']
-        self.log('Real lock enabled for this session. Start protection if it is off.')
+        self.log('Real lock enabled. Protection is on.')
         self.refresh()
 
     def launch_scan(self, kind):
@@ -587,7 +578,7 @@ class App:
                 self.policy.armed = False
                 self.policy.checks = 0
                 self.next_check = time.monotonic() + fresh['interval_seconds']
-                self.log('Settings saved. Test again before enabling real lock.')
+                self.log('Settings saved.')
                 dialog.destroy()
                 if self.setup_active:
                     self.root.after(100, self.setup_register)

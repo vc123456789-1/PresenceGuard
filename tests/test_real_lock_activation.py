@@ -14,7 +14,6 @@ class RealLockActivationTests(unittest.TestCase):
         self.root.withdraw()
         self.app = main.App(self.root, Path(self.temp.name))
         self.app.model.touch()
-        self.app.policy.checks = 1
 
     def tearDown(self):
         self.root.destroy()
@@ -22,19 +21,34 @@ class RealLockActivationTests(unittest.TestCase):
         gc.collect()
         self.temp.cleanup()
 
-    def activate(self, answers=(True, True), authorized=True):
+    def activate(self, answers=(True,), authorized=True):
         with patch.object(self.app, 'authorize', return_value=authorized), \
              patch('main.messagebox.showinfo'), patch('main.messagebox.showerror'), \
              patch('main.messagebox.askyesno', side_effect=answers):
             self.app.arm()
 
-    def test_cannot_arm_without_pin(self):
-        self.activate(authorized=False)
-        self.assertFalse(self.app.policy.armed)
+    def test_arm_does_not_require_pin(self):
+        with patch.object(self.app, 'authorize', return_value=False) as authorize, \
+             patch('main.messagebox.askyesno', return_value=True):
+            self.app.arm()
+        authorize.assert_not_called()
+        self.assertTrue(self.app.policy.armed)
 
-    def test_cannot_arm_without_one_successful_manual_check(self):
+    def test_can_arm_without_manual_camera_test(self):
         self.app.policy.checks = 0
         self.activate()
+        self.assertTrue(self.app.policy.armed)
+        self.assertTrue(self.app.policy.running)
+
+    def test_busy_camera_shows_short_message_without_cancelling(self):
+        from unittest.mock import Mock
+        cancel = Mock()
+        self.app.job = {'cancel': cancel}
+        with patch('main.messagebox.showinfo') as show, patch('main.messagebox.askyesno') as confirm:
+            self.app.arm()
+        show.assert_called_once_with('Real lock', 'Wait for the camera check to finish.', parent=self.root)
+        confirm.assert_not_called()
+        cancel.set.assert_not_called()
         self.assertFalse(self.app.policy.armed)
 
     def test_cannot_arm_without_registered_face(self):
@@ -42,18 +56,15 @@ class RealLockActivationTests(unittest.TestCase):
         self.activate()
         self.assertFalse(self.app.policy.armed)
 
-    def test_cannot_arm_when_photo_challenge_is_disabled(self):
+    def test_can_arm_when_photo_challenge_is_disabled(self):
         self.app.settings['anti_photo'] = False
         self.activate()
-        self.assertFalse(self.app.policy.armed)
-
-    def test_cannot_arm_if_validation_not_confirmed(self):
-        self.activate((False,))
-        self.assertFalse(self.app.policy.armed)
+        self.assertTrue(self.app.policy.armed)
 
     def test_cannot_arm_if_real_lock_not_confirmed(self):
-        self.activate((True, False))
+        self.activate((False,))
         self.assertFalse(self.app.policy.armed)
+        self.assertFalse(self.app.policy.running)
 
     def test_arm_with_confirmations_never_locks_immediately(self):
         self.app.policy.start()
@@ -65,6 +76,7 @@ class RealLockActivationTests(unittest.TestCase):
             lock.assert_not_called()
 
     def test_cancelled_manual_check_resets_positive_checks(self):
+        self.app.policy.checks = 1
         self.app.accept_result(self.app.epoch, 'test', None, 'Cancelled')
         self.assertEqual(self.app.policy.checks, 0)
 

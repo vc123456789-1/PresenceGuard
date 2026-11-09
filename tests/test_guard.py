@@ -135,18 +135,16 @@ class RulesTests(unittest.TestCase):
         self.assertIsNone(p.action(100))
         self.assertEqual(p.failures, 0)
 
-    def test_arm_needs_tests_and_confirmation(self):
+    def test_arm_requires_confirmation_but_no_manual_test(self):
         p = guard.Policy()
-        with self.assertRaises(ValueError):
-            p.arm(True)
-        p.result(True, 10, automatic=False)
         with self.assertRaises(ValueError):
             p.arm(False)
         p.arm(True)
         self.assertTrue(p.armed)
         p.start()
-        p.result(False, 10)
-        p.result(False, 20)
+        self.assertEqual(p.result(False, 10), 'retry')
+        self.assertEqual(p.result(False, 20), 'grace')
+        self.assertIsNone(p.action(34.9))
         self.assertEqual(p.action(35), 'lock')
 
     def test_stop_cancels_grace_and_disarms(self):
